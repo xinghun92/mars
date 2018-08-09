@@ -21,9 +21,12 @@
 #ifndef prjdef_h
 #define prjdef_h
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include "windows/projdef.h"
 #endif
+// #if (defined(_WIN32) && defined(__GNU__))
+#define PRIu64 "I64d"
+// #endif
 
 
 #endif /* prjdef_h */

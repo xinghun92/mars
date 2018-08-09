@@ -2771,7 +2771,7 @@ public:
 		dc.SetBkMode(TRANSPARENT);
 		T* pT = static_cast<T*>(this);
 		HFONT hFontOld = dc.SelectFont(pT->GetTitleFont());
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 		const UINT DT_END_ELLIPSIS = 0;
 #endif // _WIN32_WCE
 

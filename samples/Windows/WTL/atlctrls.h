@@ -9835,7 +9835,7 @@ public:
 
 // --- Windows CE common controls ---
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 
 ///////////////////////////////////////////////////////////////////////////////
 // CCECommandBarCtrl

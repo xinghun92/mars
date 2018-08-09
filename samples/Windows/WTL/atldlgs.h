@@ -1945,7 +1945,7 @@ public:
 
 #if !defined(_WIN32_WCE) || ((_WIN32_WCE > 420) && !(defined(WIN32_PLATFORM_WFSP) && (_WIN32_WCE > 0x0500)))
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
   #pragma comment(lib, "commdlg.lib")
 
   #ifndef SETRGBSTRING
@@ -4478,7 +4478,7 @@ public:
 			bHandled = FALSE;
 			return 1;
 		}
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 		ATLASSERT(::IsWindow(m_hWnd));
 #endif
 

@@ -28,7 +28,7 @@
 #include "mars/comm/xlogger/loginfo_extract.h"
 #include "mars/comm/ptrbuffer.h"
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #define PRIdMAX "lld"
 #define snprintf _snprintf
 #else

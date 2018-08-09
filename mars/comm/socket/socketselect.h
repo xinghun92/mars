@@ -12,7 +12,7 @@
 
 
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include "../windows/socketselect/socketselect2.h"
 #else
 #include "../unix/socket/socketselect.h"

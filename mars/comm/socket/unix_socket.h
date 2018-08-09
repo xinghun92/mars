@@ -14,7 +14,7 @@
 #ifndef __UNIX_SOCKET_H_
 #define  __UNIX_SOCKET_H_
 
-#if (defined(WP8) || defined(WIN32))
+#if (defined(WP8) || defined(_WIN32))
 #include <stdint.h>
 #include <ws2tcpip.h>
 #else
@@ -31,7 +31,7 @@
 
 #endif
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 
 #include "winsock2.h"
 

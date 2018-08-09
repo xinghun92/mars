@@ -386,7 +386,7 @@ public:
 	HWND m_hWndStatusBar;
 	HWND m_hWndClient;
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 	HWND m_hWndCECommandBar;
 #endif // _WIN32_WCE
 
@@ -397,7 +397,7 @@ public:
 		m_hWndToolBar(NULL), 
 		m_hWndStatusBar(NULL), 
 		m_hWndClient(NULL), 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 		m_hWndCECommandBar(NULL),
 #endif // _WIN32_WCE
 		m_hAccel(NULL)
@@ -728,7 +728,7 @@ public:
 		return CreateSimpleStatusBar(szText, dwStyle, nID);
 	}
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 	BOOL CreateSimpleCECommandBar(LPTSTR pszMenu = NULL, WORD iButton = 0, DWORD dwFlags = 0, int nCmdBarID = 1)
 	{
 		ATLASSERT(m_hWndCECommandBar == NULL);
@@ -1199,7 +1199,7 @@ public:
 #endif // _WIN32_WCE
 	}
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 	// CE specific variant that returns the handle of the toolbar
 	HWND CreateSimpleCEToolBar(UINT nResourceID = 0, DWORD dwStyle = ATL_SIMPLE_TOOLBAR_STYLE, UINT nID = ATL_IDW_TOOLBAR)
 	{

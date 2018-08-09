@@ -54,7 +54,7 @@ namespace google {
 namespace protobuf {
 namespace io {
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 // Win32 lseek is broken:  If invoked on a non-seekable file descriptor, its
 // return value is undefined.  We re-define it to always produce an error.
 #define lseek(fd, offset, origin) ((off_t)-1)

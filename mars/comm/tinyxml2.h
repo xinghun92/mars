@@ -64,7 +64,7 @@
 #   pragma warning(disable: 4251)
 #endif
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #   ifdef TINYXML2_EXPORT
 #       define TINYXML2_LIB __declspec(dllexport)
 #   elif defined(TINYXML2_IMPORT)

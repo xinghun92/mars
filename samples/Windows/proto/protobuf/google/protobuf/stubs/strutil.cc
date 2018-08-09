@@ -42,7 +42,7 @@
 
 #include <google/protobuf/stubs/stl_util.h>
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 // MSVC has only _snprintf, not snprintf.
 //
 // MinGW has both snprintf and _snprintf, but they appear to be different

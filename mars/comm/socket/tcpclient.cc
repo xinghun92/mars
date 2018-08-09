@@ -29,7 +29,7 @@
 #include "socket_address.h"
 #include "mars/comm/tickcount.h"
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #define strdup _strdup
 #endif
 
@@ -172,7 +172,7 @@ void TcpClient::__Run() {
 #endif
     }
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
     if (0 != socket_ipv6only(socket_, 0)){ xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
 #endif
     

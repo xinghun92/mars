@@ -100,7 +100,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Global support for Windows CE
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 
 #ifndef SW_SHOWDEFAULT
   #define SW_SHOWDEFAULT	SW_SHOWNORMAL

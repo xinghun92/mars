@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #endif
 
+#include "projdef.h"
 #include "boost/bind.hpp"
 
 #include "comm/thread/lock.h"
@@ -810,7 +811,7 @@ void RunLoop::Run() {
 
             if (!isDebuggerPerforming())
 #endif
-                ASSERT2(0 >= anr_timeout || anr_timeout >= (int64_t)(timeend - timestart), "anr_timeout:%" PRId64 " < cost:%" PRIu64", timestart:%" PRIu64", timeend:%" PRIu64, anr_timeout, timeend - timestart, timestart, timeend);
+                ASSERT2(0 >= anr_timeout || anr_timeout >= (int64_t)(timeend - timestart), "anr_timeout:%" PRIu64 " < cost:%" PRIu64", timestart:%" PRIu64", timeend:%" PRIu64, anr_timeout, timeend - timestart, timestart, timeend);
         }
 
         if (delmessage) {

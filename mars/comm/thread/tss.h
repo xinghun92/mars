@@ -11,7 +11,7 @@
 // limitations under the License.
 
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include "mars/comm/windows/thread/tss.h"
 #else
 #include "mars/comm/unix/thread/tss.h"

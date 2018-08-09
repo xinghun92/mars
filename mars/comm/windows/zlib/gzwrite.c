@@ -4,7 +4,7 @@
  */
 
 #include "gzguts.h"
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #define read _read	
 #define close _close
 #define write _write

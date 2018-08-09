@@ -26,7 +26,7 @@
 	#error atlribbon.h requires the Windows 7 SDK or higher
 #endif
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 	#error atlribbon.h is not supported on Windows CE
 #endif
 

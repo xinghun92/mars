@@ -14,7 +14,7 @@
 
 #pragma once
 
-#ifdef _WIN32_WCE
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE
 	#error atlctrlw.h is not supported on Windows CE
 #endif
 

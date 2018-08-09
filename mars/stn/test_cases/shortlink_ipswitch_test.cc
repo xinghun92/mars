@@ -547,7 +547,7 @@ static bool startNewdnsMockServer(const char* _ip, unsigned int _port)
 
 static void InitWinSock(TestCaseInfo *m_testCaseInfo)
 {
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 	int isWSAStartupOK=0;
 	WORD wVer;
 	WSADATA wsaData;

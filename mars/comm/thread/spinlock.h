@@ -99,7 +99,7 @@ static inline void cpu_relax() {
 }
 
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include <thr/threads.h>
 extern "C" void thrd_yield();
 #define sched_yield() thrd_yield()

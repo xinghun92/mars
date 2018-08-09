@@ -324,7 +324,7 @@ int getdefaultgateway(in_addr_t *addr)
 }
 #endif /* #ifdef USE_SOCKET_ROUTE */
 
-#ifdef USE_WIN32_CODE
+#if defined(USE_WIN32_CODE) && defined(_MSC_VER)
 int getdefaultgateway(in_addr_t * addr)
 {
     HKEY networkCardsKey;

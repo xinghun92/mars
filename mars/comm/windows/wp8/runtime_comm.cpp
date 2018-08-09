@@ -13,7 +13,7 @@ void Cs2Runtime_Comm::OnAlarm(int id) {
 
 
 void Cs2Runtime_Comm::OnCreate() {
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 #else
@@ -30,7 +30,7 @@ void Cs2Runtime_Comm::OnCreate() {
 
 void Cs2Runtime_Comm::OnDestroy() {
     xwarn2(TSF"onDestroy");
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
     WSACleanup();
 #endif
 

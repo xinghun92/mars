@@ -47,7 +47,7 @@
 #include <google/protobuf/stubs/platform_macros.h>
 
 #undef PROTOBUF_LITTLE_ENDIAN
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
   // Assuming windows is always little-endian.
   // TODO(xiaofeng): The PROTOBUF_LITTLE_ENDIAN is not only used for
   // optimization but also for correctness. We should define an

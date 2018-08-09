@@ -18,7 +18,7 @@
  *      Author: yerungui
  */
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -27,7 +27,7 @@
 #include "mars/log/appender.h"
 #include <stdio.h>
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #define PRIdMAX "lld"
 #define snprintf _snprintf
 #define strcasecmp _stricmp
@@ -36,7 +36,9 @@
 #else
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
+#ifndef __GNUC__
 #include <sys/mount.h>
+#endif
 #endif
 
 #include <ctype.h>
@@ -86,7 +88,7 @@ static time_t sg_openfiletime = 0;
 static std::string sg_current_dir;
 
 static Mutex sg_mutex_buffer_async;
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 static Condition& sg_cond_buffer_async = *(new Condition());  // 改成引用, 避免在全局释放时执行析构导致crash
 #else
 static Condition sg_cond_buffer_async;

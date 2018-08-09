@@ -39,7 +39,7 @@
 
 #ifndef GOOGLE_PROTOBUF_NO_THREAD_SAFETY
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include <windows.h>
 #else
 #include <sched.h>
@@ -53,7 +53,7 @@ namespace protobuf {
 namespace {
 
 void SchedYield() {
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
   Sleep(0);
 #else  // POSIX
   sched_yield();

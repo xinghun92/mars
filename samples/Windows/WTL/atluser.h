@@ -1344,7 +1344,7 @@ using ATL::AtlLoadString;
 
 #endif // (_ATL_VER < 0x0700)
 
-#ifdef _WIN32_WCE // CE only direct access to the resource
+#if (defined(_WIN32) && defined(_MSC_VER))_WCE // CE only direct access to the resource
 inline LPCTSTR AtlLoadString(UINT uID)
 {
 	LPCTSTR s = (LPCTSTR)::LoadString(ModuleHelper::GetResourceInstance(), uID, NULL, 0);

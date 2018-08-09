@@ -425,7 +425,7 @@ typedef uLong FAR uLongf;
 #  endif
 #endif
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #  include <stddef.h>           /* for wchar_t */
 #endif
 

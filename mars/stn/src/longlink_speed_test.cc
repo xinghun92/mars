@@ -57,7 +57,7 @@ LongLinkSpeedTestItem::LongLinkSpeedTestItem(const std::string& _ip, uint16_t _p
     }
 
     // set the socket to unblocked model
-#ifdef _WIN32 
+#if (defined(_WIN32) && defined(_MSC_VER)) 
     if (0 != socket_ipv6only(socket_, 0)){ xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
 #endif
         

@@ -39,7 +39,7 @@ int socket_set_nobio(SOCKET fd) {
 }
 #endif
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include <string.h>
 #include <windows.h>
 #include <WS2tcpip.h>
@@ -321,7 +321,7 @@ const char * socket_inet_ntop(int af, const void *src, char *dst, unsigned int s
 
 //not support in windows
 int socket_set_tcp_mss(SOCKET sockfd, int size) {
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
     return 0;
 #else
     return setsockopt(sockfd, IPPROTO_TCP, TCP_MAXSEG, &size, sizeof(size));
@@ -329,7 +329,7 @@ int socket_set_tcp_mss(SOCKET sockfd, int size) {
 }
 
 int socket_get_tcp_mss(SOCKET sockfd, int* size) {
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
     return 0;
 #else
     if (size == NULL)

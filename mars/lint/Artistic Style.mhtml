@@ -1626,7 +1626,7 @@ ithin a namespace. There are restrictions on
 option the preprocessor block is not indented.
     </p>
     <div class=3D"code">
-        <pre>#ifdef _WIN32
+        <pre>#if (defined(_WIN32) && defined(_MSC_VER))
 #include &lt;windows.h&gt;
 #ifndef NO_EXPORT
 #define EXPORT
@@ -1636,7 +1636,7 @@ option the preprocessor block is not indented.
         <p class=3D"code">
             becomes:
         </p>
-        <pre>#ifdef _WIN32
+        <pre>#if (defined(_WIN32) && defined(_MSC_VER))
     #include &lt;windows.h&gt;
     #ifndef NO_EXPORT
         #define EXPORT

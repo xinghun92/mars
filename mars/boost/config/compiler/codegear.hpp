@@ -165,7 +165,7 @@
 #define BOOST_NO_CXX11_HDR_INITIALIZER_LIST
 
 // On non-Win32 platforms let the platform config figure this out:
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #  define BOOST_HAS_STDINT_H
 #endif
 

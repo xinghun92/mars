@@ -36,7 +36,7 @@
 
 #elif defined(__INTEL_COMPILER) || defined(__ICL) || defined(__ICC) || defined(__ECC)
 //  Intel
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #  error "Compiler threading support is not turned on. Please set the correct command line options for threading: either /MT /MTd /MD or /MDd"
 #else
 #   error "Compiler threading support is not turned on. Please set the correct command line options for threading: -openmp"

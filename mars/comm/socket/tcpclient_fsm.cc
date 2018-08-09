@@ -180,7 +180,7 @@ void TcpClientFSM::PreConnectSelect(SocketSelect& _sel, XLogger& _log) {
 #endif
     }
     
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
     if (0 != socket_ipv6only(sock_, 0)){ xwarn2(TSF"set ipv6only failed. error %_",strerror(socket_errno)); }
 #endif
     

@@ -20,6 +20,7 @@
 #endif
 
 #include "mars/comm/assert/__assert.h"
+#include "projdef.h"
 
 
 const AutoBuffer KNullAtuoBuffer;

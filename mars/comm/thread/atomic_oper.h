@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include <intrin.h>
 extern "C" long __cdecl _InterlockedIncrement( long volatile * );
 extern "C" long __cdecl _InterlockedDecrement( long volatile * );
@@ -40,7 +40,7 @@ inline void atomic_write32(volatile uint32_t *mem, uint32_t val);
 inline uint32_t atomic_cas32
    (volatile uint32_t *mem, uint32_t with, uint32_t cmp);
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 //! Atomically decrement an uint32_t by 1
 //! "mem": pointer to the atomic value
 //! Returns the old value pointed to by mem

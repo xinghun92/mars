@@ -11,7 +11,7 @@
 // limitations under the License.
 
 
-#ifdef _WIN32
+#if (defined(_WIN32) && defined(_MSC_VER))
 #include "../windows/thread/lock.h"
 #else
 #include "../unix/thread/lock.h"

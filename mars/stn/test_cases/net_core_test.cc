@@ -16,7 +16,7 @@
 
 TEST(MMNetCore_test, init)
 {
-#ifdef _WIN32 
+#if (defined(_WIN32) && defined(_MSC_VER)) 
 	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2,2), &wsaData);
 #endif
