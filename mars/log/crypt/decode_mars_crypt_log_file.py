@@ -9,6 +9,7 @@ import binascii
 import pyelliptic
 import traceback
 
+from binascii import hexlify, unhexlify
 
 MAGIC_NO_COMPRESS_START = 0x03
 MAGIC_NO_COMPRESS_START1 = 0x06
@@ -22,13 +23,14 @@ MAGIC_END = 0x00
 
 lastseq = 0
 
-PRIV_KEY = "145aa7717bf9745b91e9569b80bbf1eedaa6cc6cd0e26317d810e35710f44cf8"
-PUB_KEY = "572d1e2710ae5fbca54c76a382fdd44050b3a675cb2bf39feebe85ef63d947aff0fa4943f1112e8b6af34bebebbaefa1a0aae055d9259b89a1858f7cc9af9df1"
+PRIV_KEY = "e1f859bc2216302ef14f9c5c593abbb888e41aaeac480c9f36c22d3d4354d0d1"
+PUB_KEY = "160d418c88e556a72848317d265ad0e7fbfef3790620cff62dbc5f19314839948ff92f7d9ec80c2ae6aab6767455f0fb8e3c51cf73ec8fce1eb8ccd7d2906272"
 
 def tea_decipher(v, k):
     op = 0xffffffffL
     v0, v1 = struct.unpack('=LL', v[0:8])
     k1, k2, k3, k4 = struct.unpack('=LLLL', k[0:16])
+
     delta = 0x9E3779B9L
     s = (delta << 4) & op
     for i in xrange(16):
@@ -136,6 +138,7 @@ def DecodeBuffer(_buffer, _offset, _outbuffer):
             client.pubkey_y = str(buffer(_buffer, _offset+headerLen-crypt_key_len/2, crypt_key_len/2))
 
             svr.privkey = binascii.unhexlify(PRIV_KEY)
+            print("pub key: %s" % hexlify(client.get_pubkey()))
             tea_key = svr.get_ecdh_key(client.get_pubkey())
 
             tmpbuffer = tea_decrypt(tmpbuffer, tea_key)

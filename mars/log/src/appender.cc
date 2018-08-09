@@ -796,7 +796,7 @@ static void get_mark_info(char* _info, size_t _infoLen) {
 	snprintf(_info, _infoLen, "[%" PRIdMAX ",%" PRIdMAX "][%s]", xlogger_pid(), xlogger_tid(), tmp_time);
 }
 
-void appender_open(TAppenderMode _mode, const char* _dir, const char* _nameprefix, const char* _pub_key) {
+void appender_open(enum TAppenderMode _mode, const char* _dir, const char* _nameprefix, const char* _pub_key) {
 	assert(_dir);
 	assert(_nameprefix);
     
