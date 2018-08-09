@@ -18,6 +18,12 @@
  *      Author: yerungui
  */
 
+#if defined(__linux__)
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+#include <limits.h>
+#endif
+
 #include "complexconnect.h"
 
 #ifndef _WIN32

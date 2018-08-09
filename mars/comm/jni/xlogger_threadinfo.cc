@@ -18,6 +18,14 @@
 //  Copyright (c) 2013年 Tencent. All rights reserved.
 //
 
+#if defined(__linux__)
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+#include <limits.h>
+#include <sys/syscall.h>
+#define gettid() syscall(SYS_gettid)
+#endif
+
 #include <unistd.h>
 #include "compiler_util.h"
 

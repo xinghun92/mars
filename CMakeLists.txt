@@ -2,7 +2,8 @@ cmake_minimum_required (VERSION 2.8)
 
 project (mars)
 
- set(CMAKE_CXX_FLAGS "-Os -std=c++11 -frtti")
+set(CMAKE_CXX_FLAGS "-Os -std=c++11 -frtti -fPIC")
+set(CMAKE_C_FLAGS "-fPIC")
 
 include_directories(./ mars/ mars/comm/)
 
@@ -29,9 +30,9 @@ file(GLOB COMMON_ASSERT_C "mars/comm/assert/*.c")
 file(GLOB COMMON_XLOGGER_C "mars/comm/xlogger/*.c")
 if(UNIX)
 if(NOT APPLE)
-file(GLOB COMMON_PLATFORM "mars/comm/jni/*.cc")
+file(GLOB COMMON_THREADINFO "mars/comm/jni/xlogger_threadinfo.cc")
 else()
-file(GLOB COMMON_PLATFORM "mars/comm/objc/*.mm")
+file(GLOB COMMON_THREADINFO "mars/comm/objc/xlogger_threadinfo.mm")
 endif()
 endif()
 file(GLOB BOOST_FILESYSTEM "mars/boost/libs/filesystem/src/*.cpp")
@@ -44,4 +45,4 @@ ${COMMON_CRYPT_C} ${COMMON_NETWORK_CC} ${COMMON_DNS_RESOLVE_CC}
 ${COMMON_MESSAGE_QUEUE_CC} ${COMMON_SOCKET_CC} ${COMMON_SOCKET_C}
 ${COMMON_COREPATTERN} ${COMMON_COROUTINE} ${COMMON_UNIX_SOCKET_CC}
 ${COMMON_DEBUGGER_CC} ${COMMON_HTTP_CC} ${COMMON_DND_CC} ${COMMON_ASSERT_C}
-${COMMON_XLOGGER_C} ${COMMON_PLATFORM} ${BOOST_FILESYSTEM} ${BOOST_IOSTREAM} ${BOOST_SYSTEM})
+${COMMON_XLOGGER_C} ${COMMON_THREADINFO} ${BOOST_FILESYSTEM} ${BOOST_IOSTREAM} ${BOOST_SYSTEM})

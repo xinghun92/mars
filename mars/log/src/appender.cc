@@ -72,7 +72,7 @@
 #define LOG_EXT "xlog"
 
 extern void log_formater(const XLoggerInfo* _info, const char* _logbody, PtrBuffer& _log);
-extern void ConsoleLog(const XLoggerInfo* _info, const char* _log);
+void __ConsoleLog(const XLoggerInfo* _info, const char* _log) {};
 
 static TAppenderMode sg_mode = kAppednerAsync;
 
@@ -397,7 +397,7 @@ static void __writetips2console(const char* _tips_format, ...) {
     va_start(ap, _tips_format);
     vsnprintf(tips_info, sizeof(tips_info), _tips_format, ap);
     va_end(ap);
-    ConsoleLog(&info, tips_info);
+    __ConsoleLog(&info, tips_info);
 }
 
 static bool __writefile(const void* _data, size_t _len, FILE* _file) {
@@ -663,7 +663,7 @@ void xlogger_appender(const XLoggerInfo* _info, const char* _log) {
     DEFINE_SCOPERECURSIONLIMIT(recursion);
     static Tss s_recursion_str(free);
 
-    if (sg_consolelog_open) ConsoleLog(_info,  _log);
+    if (sg_consolelog_open) __ConsoleLog(_info,  _log);
 
     if (2 <= (int)recursion.Get() && NULL == s_recursion_str.get()) {
         if ((int)recursion.Get() > 10) return;
@@ -682,7 +682,7 @@ void xlogger_appender(const XLoggerInfo* _info, const char* _log) {
         strncat(strrecursion, _log, 4096);
         strrecursion[4095] = '\0';
 
-        ConsoleLog(&info,  strrecursion);
+        __ConsoleLog(&info,  strrecursion);
     } else {
         if (NULL != s_recursion_str.get()) {
             char* strrecursion = (char*)s_recursion_str.get();
