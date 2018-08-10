@@ -29,7 +29,6 @@ bool IsMmapFileOpenSucc(const boost::iostreams::mapped_file& _mmmap_file) {
 }
 
 bool OpenMmapFile(const char* _filepath, unsigned int _size, boost::iostreams::mapped_file& _mmmap_file) {
-
     if (NULL == _filepath || 0 == strnlen(_filepath, 128) || 0 == _size) {
         return false;
     }
@@ -56,12 +55,12 @@ bool OpenMmapFile(const char* _filepath, unsigned int _size, boost::iostreams::m
     bool is_open = IsMmapFileOpenSucc(_mmmap_file);
 
     if (!file_exist && is_open) {
+        _mmmap_file.close();
 
         //Extending a file with ftruncate, thus creating a big hole, and then filling the hole by mod-ifying a shared mmap() can lead to SIGBUS when no space left
         //the boost library uses ftruncate, so we pre-allocate the file's backing store by writing zero.
         FILE* file = fopen(_filepath, "rb+");
         if (NULL == file) {
-            _mmmap_file.close();
             remove(_filepath);
             return false;
         }
@@ -70,13 +69,13 @@ bool OpenMmapFile(const char* _filepath, unsigned int _size, boost::iostreams::m
         memset(zero_data, 0, _size);
 
         if (_size != fwrite(zero_data, sizeof(char), _size, file)) {
-            _mmmap_file.close();
             fclose(file);
             remove(_filepath);
             delete[] zero_data;
             return false;
         }
         fclose(file);
+        _mmmap_file.open(param);
         delete[] zero_data;
     }
 
