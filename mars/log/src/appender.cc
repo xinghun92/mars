@@ -106,6 +106,9 @@ static bool sg_consolelog_open = true;
 static bool sg_consolelog_open = false;
 #endif
 
+static const long KMaxLengthInCurrentFile = 1024 * 1024 * 10;
+static bool is_append_overflow_in_current_file = false;
+
 static uint64_t sg_max_file_size = 0; // 0, will not split log file.
 
 static void __async_log_thread();
@@ -291,6 +294,11 @@ static void __del_timeout_file(const std::string& _log_path) {
     }
 }
 
+static void del_timeout_file(const char* _log_path) {
+    std::string log_path(_log_path);
+    __del_timeout_file(log_path);
+}
+
 static bool __append_file(const std::string& _src_file, const std::string& _dst_file) {
     if (_src_file == _dst_file) {
         return false;
@@ -409,6 +417,21 @@ static bool __writefile(const void* _data, size_t _len, FILE* _file) {
     }
 
     long before_len = ftell(_file);
+    if(KMaxLengthInCurrentFile < before_len) {
+        if(!is_append_overflow_in_current_file) {
+            is_append_overflow_in_current_file = true;
+            char err_log[256] = {0};
+            snprintf(err_log, sizeof(err_log), "\nwrite file meet max size: %ld\n", before_len);
+            
+            AutoBuffer tmp_buff;
+            sg_log_buff->Write(err_log, strnlen(err_log, sizeof(err_log)), tmp_buff);
+            
+            fwrite(tmp_buff.Ptr(), tmp_buff.Length(), 1, _file);
+        }
+        return true;
+    }
+    is_append_overflow_in_current_file = false;
+    
     if (before_len < 0) return false;
 
     if (1 != fwrite(_data, _len, 1, _file)) {
@@ -859,27 +882,6 @@ void appender_open(enum TAppenderMode _mode, const char* _dir, const char* _name
 
     tickcountdiff_t get_mmap_time = tickcount_t().gettickcount() - tick;
 
-
-    char appender_info[728] = {0};
-    snprintf(appender_info, sizeof(appender_info), "^^^^^^^^^^" __DATE__ "^^^" __TIME__ "^^^^^^^^^^%s", mark_info);
-
-    xlogger_appender(NULL, appender_info);
-    char logmsg[64] = {0};
-    snprintf(logmsg, sizeof(logmsg), "del time out files time: %" PRIu64, (int64_t)del_timeout_file_time);
-    xlogger_appender(NULL, logmsg);
-
-    snprintf(logmsg, sizeof(logmsg), "get mmap time: %" PRIu64, (int64_t)get_mmap_time);
-    xlogger_appender(NULL, logmsg);
-
-    xlogger_appender(NULL, "MARS_URL: " MARS_URL);
-    xlogger_appender(NULL, "MARS_PATH: " MARS_PATH);
-    xlogger_appender(NULL, "MARS_REVISION: " MARS_REVISION);
-    xlogger_appender(NULL, "MARS_BUILD_TIME: " MARS_BUILD_TIME);
-    xlogger_appender(NULL, "MARS_BUILD_JOB: " MARS_TAG);
-
-    snprintf(logmsg, sizeof(logmsg), "log appender mode:%d, use mmap:%d", (int)_mode, use_mmap);
-    xlogger_appender(NULL, logmsg);
-
 	BOOT_RUN_EXIT(appender_close);
 
 }
@@ -931,7 +933,6 @@ void appender_close() {
     char mark_info[512] = {0};
     get_mark_info(mark_info, sizeof(mark_info));
     char appender_info[728] = {0};
-    snprintf(appender_info, sizeof(appender_info), "$$$$$$$$$$" __DATE__ "$$$" __TIME__ "$$$$$$$$$$%s\n", mark_info);
     xlogger_appender(NULL, appender_info);
 
     sg_log_close = true;
