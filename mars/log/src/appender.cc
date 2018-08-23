@@ -294,7 +294,7 @@ static void __del_timeout_file(const std::string& _log_path) {
     }
 }
 
-static void del_timeout_file(const char* _log_path) {
+void del_timeout_file(const char* _log_path) {
     std::string log_path(_log_path);
     __del_timeout_file(log_path);
 }
@@ -575,6 +575,7 @@ static void __log2file(const void* _data, size_t _len) {
 
         char logfilepath[1024] = {0};
         __make_logfilename(tv, sg_logdir, sg_logfileprefix.c_str(), LOG_EXT, logfilepath , 1024);
+        
         if (__append_file(logcachefilepath, logfilepath)) {
             if (kAppednerSync == sg_mode) {
                 __closelogfile();

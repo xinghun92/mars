@@ -46,6 +46,7 @@ bool appender_make_logfile_name(int _timespan, const char* _prefix, std::vector<
 bool appender_get_current_log_path(char* _log_path, unsigned int _len);
 bool appender_get_current_log_cache_path(char* _logPath, unsigned int _len);
 void appender_set_console_log(bool _is_open);
+void del_timeout_file(const char* _log_path);
 
 /*
  * By default, all logs will write to one file everyday. You can split logs to multi-file by changing max_file_size.
