@@ -18,19 +18,22 @@
 //  Copyright (c) 2013年 Tencent. All rights reserved.
 //
 
+
+#include <unistd.h>
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 #include <limits.h>
 #if defined(__linux__)
+#ifndef __ANDROID__
 #include <sys/syscall.h>
 #define gettid() syscall(SYS_gettid)
+#endif
 #endif
 #if defined(__GNUC__)
 #include <pthread.h>
 #define gettid() pthread_self()
 #endif
 
-#include <unistd.h>
 #include "compiler_util.h"
 
 extern "C"

@@ -24,9 +24,10 @@
 #if (defined(_WIN32) && defined(_MSC_VER))
 #include "windows/projdef.h"
 #endif
-// #if (defined(_WIN32) && defined(__GNU__))
+#if ((defined(_WIN32) && defined(__GNU__)) || defined(__linux__))
+#ifndef __ANDROID__
 #define PRIu64 "I64d"
-// #endif
-
+#endif
+#endif
 
 #endif /* prjdef_h */

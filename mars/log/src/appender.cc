@@ -839,7 +839,7 @@ void appender_open(enum TAppenderMode _mode, const char* _dir, const char* _name
     tick.gettickcount();
 	__del_timeout_file(_dir);
 
-    tickcountdiff_t del_timeout_file_time = tickcount_t().gettickcount() - tick;
+    // tickcountdiff_t del_timeout_file_time = tickcount_t().gettickcount() - tick;
     
     tick.gettickcount();
 
@@ -881,7 +881,7 @@ void appender_open(enum TAppenderMode _mode, const char* _dir, const char* _name
         __writetips2file("~~~~~ end of mmap ~~~~~%s\n", mark_info);
     }
 
-    tickcountdiff_t get_mmap_time = tickcount_t().gettickcount() - tick;
+    // tickcountdiff_t get_mmap_time = tickcount_t().gettickcount() - tick;
 
 	BOOT_RUN_EXIT(appender_close);
 
