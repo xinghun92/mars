@@ -106,7 +106,7 @@ static bool sg_consolelog_open = true;
 static bool sg_consolelog_open = false;
 #endif
 
-static const long KMaxLengthInCurrentFile = 1024 * 1024 * 10;
+static long max_size_in_current_file = 1024 * 1024 * 10;
 static bool is_append_overflow_in_current_file = false;
 
 static uint64_t sg_max_file_size = 0; // 0, will not split log file.
@@ -139,6 +139,10 @@ class ScopeErrno {
 #define SCOPE_ERRNO_I(line) SCOPE_ERRNO_II(line)
 #define SCOPE_ERRNO_II(line) ScopeErrno __scope_errno_##line
 
+}
+
+void set_max_size_in_current_file(long max_size) {
+    max_size_in_current_file = max_size;
 }
 
 static std::string __make_logfilenameprefix(const timeval& _tv, const char* _prefix) {
@@ -417,7 +421,7 @@ static bool __writefile(const void* _data, size_t _len, FILE* _file) {
     }
 
     long before_len = ftell(_file);
-    if(KMaxLengthInCurrentFile < before_len) {
+    if(max_size_in_current_file < before_len) {
         if(!is_append_overflow_in_current_file) {
             is_append_overflow_in_current_file = true;
             char err_log[256] = {0};

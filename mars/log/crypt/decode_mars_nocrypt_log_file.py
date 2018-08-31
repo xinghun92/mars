@@ -127,6 +127,7 @@ def DecodeBuffer(_buffer, _offset, _outbuffer):
 
 
 def ParseFile(_file, _outfile):
+    print('parse file: %s' % _file)
     fp = open(_file, "rb")
     _buffer = bytearray(os.path.getsize(_file))
     fp.readinto(_buffer)
