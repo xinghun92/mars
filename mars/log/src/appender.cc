@@ -276,33 +276,6 @@ static void __del_files(const std::string& _forder_path) {
     }
 }
 
-static void __del_timeout_file(const std::string& _log_path) {
-    time_t now_time = time(NULL);
-    
-    boost::filesystem::path path(_log_path);
-    
-    if (boost::filesystem::exists(path) && boost::filesystem::is_directory(path)){
-        boost::filesystem::directory_iterator end_iter;
-        for (boost::filesystem::directory_iterator iter(path); iter != end_iter; ++iter) {
-            time_t fileModifyTime = boost::filesystem::last_write_time(iter->path());
-            
-            if (now_time > fileModifyTime && now_time - fileModifyTime > kMaxLogAliveTime) {
-                if (boost::filesystem::is_regular_file(iter->status())) {
-                    boost::filesystem::remove(iter->path());
-                }
-                else if (boost::filesystem::is_directory(iter->status())) {
-                    __del_files(iter->path().string());
-                }
-            }
-        }
-    }
-}
-
-void del_timeout_file(const char* _log_path) {
-    std::string log_path(_log_path);
-    __del_timeout_file(log_path);
-}
-
 static bool __append_file(const std::string& _src_file, const std::string& _dst_file) {
     if (_src_file == _dst_file) {
         return false;
@@ -841,7 +814,6 @@ void appender_open(enum TAppenderMode _mode, const char* _dir, const char* _name
 	boost::filesystem::create_directories(_dir);
     tickcount_t tick;
     tick.gettickcount();
-	__del_timeout_file(_dir);
 
     // tickcountdiff_t del_timeout_file_time = tickcount_t().gettickcount() - tick;
     
@@ -901,7 +873,6 @@ void appender_open_with_cache(TAppenderMode _mode, const std::string& _cachedir,
     if (!_cachedir.empty()) {
     	sg_cache_logdir = _cachedir;
     	boost::filesystem::create_directories(_cachedir);
-    	__del_timeout_file(_cachedir);
         // "_nameprefix" must explicitly convert to "std::string", or when the thread is ready to run, "_nameprefix" has been released.
         Thread(boost::bind(&__move_old_files, _cachedir, _logdir, std::string(_nameprefix))).start_after(3 * 60 * 1000);
     }

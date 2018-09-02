@@ -24,8 +24,8 @@ fat:
 	cd $(XLOG_PATH)/mars-log-iphone/mars.framework/; \
 	rm -rf xlog; \
 	mkdir -p xlog/armv7/;\
-	lipo mars -thin armv7 -output xlog/armv7/xlog.a;\
+	lipo mars -thin armv7 -output xlog/armv7/libxlog.a;\
 	mkdir -p xlog/aarch64/;\
-	lipo mars -thin arm64 -output xlog/aarch64/xlog.a;\
+	lipo mars -thin arm64 -output xlog/aarch64/libxlog.a;\
 	mkdir -p xlog/x86_64/;\
-	lipo mars -thin x86_64 -output xlog/x86_64/xlog.a;\
+	lipo mars -thin x86_64 -output xlog/x86_64/libxlog.a;\
