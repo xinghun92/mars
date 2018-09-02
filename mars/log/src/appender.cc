@@ -260,22 +260,6 @@ static void __make_logfilename(const timeval& _tv, const std::string& _logdir, c
     _filepath[_len - 1] = '\0';
 }
 
-static void __del_files(const std::string& _forder_path) {
-    
-    boost::filesystem::path path(_forder_path);
-    if (!boost::filesystem::is_directory(path)) {
-        return;
-    }
-    
-    boost::filesystem::directory_iterator end_iter;
-    for (boost::filesystem::directory_iterator iter(path); iter != end_iter; ++iter) {
-        if (boost::filesystem::is_regular_file(iter->status()))
-        {
-            boost::filesystem::remove(iter->path());
-        }
-    }
-}
-
 static bool __append_file(const std::string& _src_file, const std::string& _dst_file) {
     if (_src_file == _dst_file) {
         return false;
