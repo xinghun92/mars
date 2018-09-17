@@ -87,14 +87,18 @@ static FILE* sg_logfile = NULL;
 static time_t sg_openfiletime = 0;
 static std::string sg_current_dir;
 
-static Mutex sg_mutex_buffer_async;
+static Mutex sg_mutex_buffer_async1;
+static Mutex sg_mutex_buffer_async2;
+static bool use_sg_mutex_async1 = true;
+
 #if (defined(_WIN32) && defined(_MSC_VER))
 static Condition& sg_cond_buffer_async = *(new Condition());  // 改成引用, 避免在全局释放时执行析构导致crash
 #else
 static Condition sg_cond_buffer_async;
 #endif
 
-static LogBuffer* sg_log_buff = NULL;
+static LogBuffer* sg_log_buff1 = NULL;
+static LogBuffer* sg_log_buff2 = NULL;
 
 static volatile bool sg_log_close = true;
 
@@ -115,11 +119,11 @@ static void __async_log_thread();
 static Thread sg_thread_async(&__async_log_thread);
 
 static const unsigned int kBufferBlockLength = 150 * 1024;
-static const long kMaxLogAliveTime = 10 * 24 * 60 * 60;	// 10 days in second
 
 static std::string sg_log_extra_msg;
 
-static boost::iostreams::mapped_file sg_mmmap_file;
+static boost::iostreams::mapped_file sg_mmmap_file1;
+static boost::iostreams::mapped_file sg_mmmap_file2;
 
 namespace {
 class ScopeErrno {
@@ -260,6 +264,8 @@ static void __make_logfilename(const timeval& _tv, const std::string& _logdir, c
     _filepath[_len - 1] = '\0';
 }
 
+
+
 static bool __append_file(const std::string& _src_file, const std::string& _dst_file) {
     if (_src_file == _dst_file) {
         return false;
@@ -385,7 +391,7 @@ static bool __writefile(const void* _data, size_t _len, FILE* _file) {
             snprintf(err_log, sizeof(err_log), "\nwrite file meet max size: %ld\n", before_len);
             
             AutoBuffer tmp_buff;
-            sg_log_buff->Write(err_log, strnlen(err_log, sizeof(err_log)), tmp_buff);
+            sg_log_buff1->Write(err_log, strnlen(err_log, sizeof(err_log)), tmp_buff);
             
             fwrite(tmp_buff.Ptr(), tmp_buff.Length(), 1, _file);
         }
@@ -408,7 +414,7 @@ static bool __writefile(const void* _data, size_t _len, FILE* _file) {
         snprintf(err_log, sizeof(err_log), "\nwrite file error:%d\n", err);
 
         AutoBuffer tmp_buff;
-        sg_log_buff->Write(err_log, strnlen(err_log, sizeof(err_log)), tmp_buff);
+        sg_log_buff1->Write(err_log, strnlen(err_log, sizeof(err_log)), tmp_buff);
 
         fwrite(tmp_buff.Ptr(), tmp_buff.Length(), 1, _file);
 
@@ -482,7 +488,7 @@ static bool __openlogfile(const std::string& _log_dir) {
         snprintf(log, sizeof(log), "[F][ last log file:%s from %s to %s, time_diff:%ld, tick_diff:%" PRIu64 "\n", s_last_file_path, last_time_str, now_time_str, now_time-s_last_time, now_tick-s_last_tick);
 
         AutoBuffer tmp_buff;
-        sg_log_buff->Write(log, strnlen(log, sizeof(log)), tmp_buff);
+        sg_log_buff1->Write(log, strnlen(log, sizeof(log)), tmp_buff);
         __writefile(tmp_buff.Ptr(), tmp_buff.Length(), sg_logfile);
     }
 
@@ -583,23 +589,43 @@ static void __writetips2file(const char* _tips_format, ...) {
     va_end(ap);
 
     AutoBuffer tmp_buff;
-    sg_log_buff->Write(tips_info, strnlen(tips_info, sizeof(tips_info)), tmp_buff);
+    sg_log_buff1->Write(tips_info, strnlen(tips_info, sizeof(tips_info)), tmp_buff);
     
     __log2file(tmp_buff.Ptr(), tmp_buff.Length());
 }
 
+static Mutex& get_sg_mutex_buffer_async() {
+    if(use_sg_mutex_async1) {
+        return sg_mutex_buffer_async1;
+    } else {
+        return sg_mutex_buffer_async2;
+    }
+}
+
+static LogBuffer* get_sg_log_buff() {
+    if(use_sg_mutex_async1) {
+        return sg_log_buff1;
+    } else {
+        return sg_log_buff2;
+    }
+}
+
 static void __async_log_thread() {
     while (true) {
-
+        Mutex& sg_mutex_buffer_async = get_sg_mutex_buffer_async();
         ScopedLock lock_buffer(sg_mutex_buffer_async);
-
+        
+        LogBuffer* sg_log_buff = get_sg_log_buff();
         if (NULL == sg_log_buff) break;
 
         AutoBuffer tmp;
         sg_log_buff->Flush(tmp);
-        lock_buffer.unlock();
-
+        use_sg_mutex_async1 = !use_sg_mutex_async1;
+        
 		if (NULL != tmp.Ptr())  __log2file(tmp.Ptr(), tmp.Length());
+        
+        sg_log_buff->Clear();
+        lock_buffer.unlock();
 
         if (sg_log_close) break;
 
@@ -614,13 +640,15 @@ static void __appender_sync(const XLoggerInfo* _info, const char* _log) {
     log_formater(_info, _log, log);
 
     AutoBuffer tmp_buff;
-    if (!sg_log_buff->Write(log.Ptr(), log.Length(), tmp_buff))   return;
+    if (!sg_log_buff1->Write(log.Ptr(), log.Length(), tmp_buff))   return;
 
     __log2file(tmp_buff.Ptr(), tmp_buff.Length());
 }
 
 static void __appender_async(const XLoggerInfo* _info, const char* _log) {
+    Mutex& sg_mutex_buffer_async = get_sg_mutex_buffer_async();
     ScopedLock lock(sg_mutex_buffer_async);
+    LogBuffer* sg_log_buff = get_sg_log_buff();
     if (NULL == sg_log_buff) return;
 
     char temp[16*1024] = {0};       //tell perry,ray if you want modify size.
@@ -804,26 +832,39 @@ void appender_open(enum TAppenderMode _mode, const char* _dir, const char* _name
     tick.gettickcount();
 
     char mmap_file_path[512] = {0};
+    char mmap_file_path2[512] = {0};
     snprintf(mmap_file_path, sizeof(mmap_file_path), "%s/%s.mmap2", sg_cache_logdir.empty()?_dir:sg_cache_logdir.c_str(), _nameprefix);
+    snprintf(mmap_file_path2, sizeof(mmap_file_path), "%s/%s2.mmap2", sg_cache_logdir.empty()?_dir:sg_cache_logdir.c_str(), _nameprefix);
 
     bool use_mmap = false;
-    if (OpenMmapFile(mmap_file_path, kBufferBlockLength, sg_mmmap_file))  {
-        sg_log_buff = new LogBuffer(sg_mmmap_file.data(), kBufferBlockLength, true, _pub_key);
+    if (OpenMmapFile(mmap_file_path, kBufferBlockLength, sg_mmmap_file1))  {
+        sg_log_buff1 = new LogBuffer(sg_mmmap_file1.data(), kBufferBlockLength, true, _pub_key);
         use_mmap = true;
     } else {
         char* buffer = new char[kBufferBlockLength];
-        sg_log_buff = new LogBuffer(buffer, kBufferBlockLength, true, _pub_key);
+        sg_log_buff1 = new LogBuffer(buffer, kBufferBlockLength, true, _pub_key);
+        use_mmap = false;
+    }
+    
+    if (OpenMmapFile(mmap_file_path2, kBufferBlockLength, sg_mmmap_file2))  {
+        sg_log_buff2 = new LogBuffer(sg_mmmap_file2.data(), kBufferBlockLength, true, _pub_key);
+        use_mmap = true;
+    } else {
+        char* buffer = new char[kBufferBlockLength];
+        sg_log_buff2 = new LogBuffer(buffer, kBufferBlockLength, true, _pub_key);
         use_mmap = false;
     }
 
-    if (NULL == sg_log_buff->GetData().Ptr()) {
-        if (use_mmap && sg_mmmap_file.is_open())  CloseMmapFile(sg_mmmap_file);
+    if (NULL == sg_log_buff1->GetData().Ptr() || NULL == sg_log_buff2->GetData().Ptr()) {
+        if (use_mmap && sg_mmmap_file1.is_open())  CloseMmapFile(sg_mmmap_file1);
+        if (use_mmap && sg_mmmap_file2.is_open())  CloseMmapFile(sg_mmmap_file2);
         return;
     }
 
-
-    AutoBuffer buffer;
-    sg_log_buff->Flush(buffer);
+    AutoBuffer buffer1;
+    AutoBuffer buffer2;
+    sg_log_buff1->Flush(buffer1);
+    sg_log_buff2->Flush(buffer2);
 
 	ScopedLock lock(sg_mutex_log_file);
 	sg_logdir = _dir;
@@ -835,16 +876,23 @@ void appender_open(enum TAppenderMode _mode, const char* _dir, const char* _name
     char mark_info[512] = {0};
     get_mark_info(mark_info, sizeof(mark_info));
 
-    if (buffer.Ptr()) {
+    if (buffer1.Ptr()) {
         __writetips2file("~~~~~ begin of mmap ~~~~~\n");
-        __log2file(buffer.Ptr(), buffer.Length());
+        __log2file(buffer1.Ptr(), buffer1.Length());
         __writetips2file("~~~~~ end of mmap ~~~~~%s\n", mark_info);
     }
+    if (buffer2.Ptr()) {
+        __writetips2file("~~~~~ begin of mmap ~~~~~\n");
+        __log2file(buffer2.Ptr(), buffer2.Length());
+        __writetips2file("~~~~~ end of mmap ~~~~~%s\n", mark_info);
+    }
+    
+    sg_log_buff1->Clear();
+    sg_log_buff2->Clear();
 
     // tickcountdiff_t get_mmap_time = tickcount_t().gettickcount() - tick;
 
 	BOOT_RUN_EXIT(appender_close);
-
 }
 
 void appender_open_with_cache(TAppenderMode _mode, const std::string& _cachedir, const std::string& _logdir, const char* _nameprefix, const char* _pub_key) {
@@ -874,17 +922,18 @@ void appender_flush_sync() {
         return;
     }
 
+    Mutex& sg_mutex_buffer_async = get_sg_mutex_buffer_async();
     ScopedLock lock_buffer(sg_mutex_buffer_async);
+    LogBuffer* sg_log_buff = get_sg_log_buff();
     
     if (NULL == sg_log_buff) return;
 
     AutoBuffer tmp;
     sg_log_buff->Flush(tmp);
-
+    sg_log_buff->Clear();
     lock_buffer.unlock();
 
 	if (tmp.Ptr())  __log2file(tmp.Ptr(), tmp.Length());
-
 }
 
 void appender_close() {
@@ -902,18 +951,28 @@ void appender_close() {
     if (sg_thread_async.isruning())
         sg_thread_async.join();
 
-	
+    Mutex& sg_mutex_buffer_async = get_sg_mutex_buffer_async();
     ScopedLock buffer_lock(sg_mutex_buffer_async);
-    if (sg_mmmap_file.is_open()) {
-        if (!sg_mmmap_file.operator !()) memset(sg_mmmap_file.data(), 0, kBufferBlockLength);
+    if (sg_mmmap_file1.is_open()) {
+        if (!sg_mmmap_file1.operator !()) memset(sg_mmmap_file1.data(), 0, kBufferBlockLength);
 
-		CloseMmapFile(sg_mmmap_file);
+		CloseMmapFile(sg_mmmap_file1);
     } else {
-        delete[] (char*)((sg_log_buff->GetData()).Ptr());
+        delete[] (char*)((sg_log_buff1->GetData()).Ptr());
+    }
+    
+    if (sg_mmmap_file2.is_open()) {
+        if (!sg_mmmap_file2.operator !()) memset(sg_mmmap_file2.data(), 0, kBufferBlockLength);
+        
+        CloseMmapFile(sg_mmmap_file2);
+    } else {
+        delete[] (char*)((sg_log_buff2->GetData()).Ptr());
     }
 
-    delete sg_log_buff;
-    sg_log_buff = NULL;
+    delete sg_log_buff1;
+    delete sg_log_buff2;
+    sg_log_buff1 = NULL;
+    sg_log_buff2 = NULL;
     buffer_lock.unlock();
 
     ScopedLock lock(sg_mutex_log_file);

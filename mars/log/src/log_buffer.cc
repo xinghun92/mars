@@ -75,7 +75,6 @@ void LogBuffer::Flush(AutoBuffer& _buff) {
     
     __Flush();
     _buff.Write(buff_.Ptr(), buff_.Length());
-    __Clear();
 }
 
 bool LogBuffer::Write(const void* _data, size_t _inputlen, AutoBuffer& _out_buff) {
@@ -132,6 +131,10 @@ bool LogBuffer::Write(const void* _data, size_t _length) {
     log_crypt_->UpdateLogLen((char*)buff_.Ptr(), (uint32_t)(out_buffer.Length() - last_remain_len));
 
     return true;
+}
+
+void LogBuffer::Clear() {
+    __Clear();
 }
 
 bool LogBuffer::__Reset() {
